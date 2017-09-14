@@ -9,7 +9,7 @@ Using data from the [*GBT Ammonia Survey* (GAS) Data Release 1](https://datavers
 ## Data from GAS DR1 and Herschel
 The main dataset used in the analyses are from the GAS DR1 ([Friesen and Pineda et al., 2017](https://ui.adsabs.harvard.edu/#abs/2017ApJ...843...63F/abstract)) and is hosted on [Dataverse](https://dataverse.harvard.edu/dataverse/GAS_Project).  The *Herschel* column density maps are derived by Ayushi Singh and Peter Martin at University of Toronto, using archival data from the *Herschel Space Observatory*.  The data in this repo are copies of the data hosted on Dataverse, without any modification.
 
-Due to the Github policy, data files larger than 100 MB are not hosted here.  These include the raw data cubes and the position-position-velocity cubes from velocity decomposition based on Gaussian line fitting to the ammonia emission lines.  These large files are not necessary to run codes in this repo.  Please look in the GBT DR1 dataverse for the files.
+Due to the Github policy, data files larger than 100 MB are not hosted here.  These include the raw data cubes and the position-position-velocity cubes based on results of Gaussian line fitting to the ammonia hyperfine lines.  These large files are not necessary to run codes in this repo.  Please look in the GBT DR1 dataverse for the files.
 
 ## Status of the Project and the Github Repo
 A manuscript is being prepared on Authorea.  Meanwhile, results of analyses are actively shared in this repo, together with the code used for these analyses.  Currently, the codes are *not* yet stable enough to be applied on other datasets.  Please approach with caution.
