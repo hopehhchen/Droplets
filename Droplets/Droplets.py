@@ -54,6 +54,42 @@ def centroidMask(mask):
     return xcent, ycent
 
 
+def frameMask(mask):
+    '''
+    The function used to determine the frame in which the structure is centered.
+    This is mainly for plotting.
+
+    Input
+    ------
+    mask: a 2D-array, either of type boolean, or any type that can be converted
+    to the boolean.
+
+    Output
+    ------
+    xcorner, ycorder: bottom left (x, y) [axis-1 and axis-0] of the frame
+    width, height: of the frame
+    '''
+
+    # Create the coordinate grids.
+    mask = mask.astype(bool)
+    xgrid, ygrid = np.meshgrid(np.arange(mask.shape[1], dtype = float),
+                               np.arange(mask.shape[0], dtype = float))
+
+    # Calculate the extent of the mask.
+    xmin, xmax = np.min(xgrid[mask]), np.max(xgrid[mask])
+    ymin, ymax = np.min(ygrid[mask]), np.max(ygrid[mask])
+
+    # Calculate the frame based on the extent
+    xcorner = xmin - .5*(xmax-xmin)
+    ycorner = ymin - .5*(ymax-ymin)
+    width = 2.*(xmax-xmin)
+    height = 2.*(ymax-ymin)
+
+
+
+    return xcorner, ycorner, width, height
+
+
 
 
 def fitGradient(mask, Vlsr, eVlsr):
