@@ -19,7 +19,7 @@ rcParams['image.origin'] = 'bottom'
 rcParams['patch.facecolor'] = 'yellow'
 rcParams['patch.edgecolor'] = 'none'
 # font
-rcParams['font.size'] = 26
+rcParams['font.size'] = 28
 rcParams['font.family'] = 'StixGeneral'
 # legend
 rcParams['legend.frameon'] = False
