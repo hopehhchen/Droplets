@@ -80,10 +80,10 @@ def frameMask(mask):
     ymin, ymax = np.min(ygrid[mask]), np.max(ygrid[mask])
 
     # Calculate the frame based on the extent
-    xcorner = xmin - .5*(xmax-xmin)
-    ycorner = ymin - .5*(ymax-ymin)
-    width = 2.*(xmax-xmin)
-    height = 2.*(ymax-ymin)
+    xcorner = xmin - .75*(xmax-xmin)
+    ycorner = ymin - .75*(ymax-ymin)
+    width = 2.5*(xmax-xmin)
+    height = 2.5*(ymax-ymin)
 
 
 
