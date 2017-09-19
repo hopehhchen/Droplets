@@ -217,7 +217,8 @@ def readGradient(gradfit, fitter, header, reg):
     return GradMag, eGradMag, GradPA, eGradPA
 
 
-def plotDroplet(reg, core, list_dictionaries):
+# a plotting function
+def plotDroplet(reg, core, list_dictionaries, annotate = True):
     '''
     The function used to plot the droplet for examining the boundary definition.
 
@@ -245,6 +246,12 @@ def plotDroplet(reg, core, list_dictionaries):
                    dict_data[reg]['Sigma'],
                    dict_data[reg]['Vlsr'],
                    dict_Vlsr_predicted[reg][core]]
+    list_names = [r'$N_{H_2}$',
+                  r'$T_{dust}$',
+                  r'$T_{peak}$',
+                  r'$\sigma_{{NH}_3}$',
+                  r'$V_{LSR}$',
+                  r'$Pred. V_{LSR}$']
     list_norms = [colors.LogNorm(np.nanmedian(list_images[0][mask])/5.,
                                  np.nanmedian(list_images[0][mask])*2.),
                   colors.Normalize(np.nanmedian(list_images[1][mask])-3.,
@@ -280,7 +287,17 @@ def plotDroplet(reg, core, list_dictionaries):
     scalebar = scalebar[np.argmin(abs(scalebar_pix-.25*frame[2]))]
     scalebar_pix = scalebar_pix[np.argmin(abs(scalebar_pix-.25*frame[2]))]
 
-
+    fig.text(.5, .0015, 'R.A.[J2000]',
+             color = 'k',
+             weight = 'black',
+             verticalalignment = 'bottom',
+             horizontalalignment = 'center')
+    fig.text(.005, .5, 'Dec.[J2000]',
+             rotation = 90.,
+             color = 'k',
+             weight = 'black',
+             verticalalignment = 'center',
+             horizontalalignment = 'left')
 
     for i in range(len(list_images)):
         icol, irow = i%ncols, i//ncols
@@ -350,6 +367,30 @@ def plotDroplet(reg, core, list_dictionaries):
                           edgecolor = 'k',
                           linewidth = 1.)
         '''
+        if annotate:
+            corner_max = np.max(image[int(frame[1]):int(frame[1]+.9*frame[3]),
+                                      int(frame[0]):int(frame[0]+.1*frame[2])])
+            corner_min = np.min(image[int(frame[1]):int(frame[1]+.9*frame[3]),
+                                      int(frame[0]):int(frame[0]+.1*frame[2])])
+
+            if (corner_max >= list_norms[i].vmax):
+                axis.text(frame[0]+.1*frame[2], frame[1]+.9*frame[3], list_names[i],
+                          color = 'w',
+                          weight = 'bold',
+                          horizontalalignment = 'center',
+                          verticalalignment = 'center')
+            elif (i in [4, 5]) and (corner_min < list_norms[i].vmin):
+                axis.text(frame[0]+.1*frame[2], frame[1]+.9*frame[3], list_names[i],
+                          color = 'w',
+                          weight = 'bold',
+                          horizontalalignment = 'center',
+                          verticalalignment = 'center')
+            else:
+                axis.text(frame[0]+.1*frame[2], frame[1]+.9*frame[3], list_names[i],
+                          color = 'k',
+                          weight = 'bold',
+                          horizontalalignment = 'center',
+                          verticalalignment = 'center')
 
         beam_center = tuple(wcs_GAS.wcs_pix2world([[frame[0]+1./6.*frame[2], frame[1]+1./6.*frame[3]]], 0)[0]*u.deg)
         beam_size = header['BMAJ']/2. * u.degree
