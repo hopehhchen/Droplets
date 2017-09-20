@@ -21,6 +21,7 @@ import pandas as pd
 
 #
 from constants import *
+from ssk_colors import *
 import styles
 
 
@@ -229,12 +230,15 @@ def plotDroplet(reg, core, list_dictionaries, annotate = True):
     core: The core number.  From 1 to 12 for 'L1688', and from 1 to 6 for 'B18'.
           L1688 has an 'extra' core.
 
+    list_dictionaries: list of data dictionaries in the order of dict_data,
+                       dict_masks, dict_YSOs, and dict_Vlsr_predicted.
+
     Output
     ------
     fig: matplotlib figure instantce
     '''
 
-    #reg, core = 'L1688', 6
+
     dict_data, dict_masks, dict_YSOs, dict_Vlsr_predicted = list_dictionaries
     mask = dict_masks[reg][core]
     header = dict_data[reg]['header_GAS']
@@ -260,13 +264,13 @@ def plotDroplet(reg, core, list_dictionaries, annotate = True):
                                  np.nanmedian(list_images[2][mask])*2.),
                   colors.Normalize(.05, .45),
                   colors.Normalize(np.nanmedian(list_images[4][mask])-
-                                   (np.nanmax(list_images[4][mask])-np.nanmin(list_images[5][mask])),
+                                   (np.nanmax(list_images[4][mask])-np.nanmin(list_images[4][mask])),
                                    np.nanmedian(list_images[4][mask])+
-                                   (np.nanmax(list_images[4][mask])-np.nanmin(list_images[5][mask]))),
+                                   (np.nanmax(list_images[4][mask])-np.nanmin(list_images[4][mask]))),
                   colors.Normalize(np.nanmedian(list_images[4][mask])-
-                                   (np.nanmax(list_images[4][mask])-np.nanmin(list_images[5][mask])),
+                                   (np.nanmax(list_images[4][mask])-np.nanmin(list_images[4][mask])),
                                    np.nanmedian(list_images[4][mask])+
-                                   (np.nanmax(list_images[4][mask])-np.nanmin(list_images[5][mask])))]
+                                   (np.nanmax(list_images[4][mask])-np.nanmin(list_images[4][mask])))]
     list_cmaps = ['Greys',
                   'YlOrRd_r',
                   'Greys',
@@ -287,17 +291,18 @@ def plotDroplet(reg, core, list_dictionaries, annotate = True):
     scalebar = scalebar[np.argmin(abs(scalebar_pix-.25*frame[2]))]
     scalebar_pix = scalebar_pix[np.argmin(abs(scalebar_pix-.25*frame[2]))]
 
-    fig.text(.5, .0015, 'R.A.[J2000]',
-             color = 'k',
-             weight = 'black',
-             verticalalignment = 'bottom',
-             horizontalalignment = 'center')
-    fig.text(.005, .5, 'Dec.[J2000]',
-             rotation = 90.,
-             color = 'k',
-             weight = 'black',
-             verticalalignment = 'center',
-             horizontalalignment = 'left')
+    if annotate:
+        fig.text(.5, .0015, 'R.A.[J2000]',
+                 color = 'k',
+                 weight = 'black',
+                 verticalalignment = 'bottom',
+                 horizontalalignment = 'center')
+        fig.text(.005, .5, 'Dec.[J2000]',
+                 rotation = 90.,
+                 color = 'k',
+                 weight = 'black',
+                 verticalalignment = 'center',
+                 horizontalalignment = 'left')
 
     for i in range(len(list_images)):
         icol, irow = i%ncols, i//ncols
@@ -406,6 +411,249 @@ def plotDroplet(reg, core, list_dictionaries, annotate = True):
         axis.set_xlim(frame[0], frame[0]+frame[2])
         axis.set_ylim(frame[1], frame[1]+frame[3])
         axis.coords[0].set_major_formatter('hh:mm:ss')
+        if irow != (nrows-1):
+            axis.coords[0].set_ticklabel_visible(False)
+        if icol != 0:
+            axis.coords[1].set_ticklabel_visible(False)
+
+
+    return fig
+
+
+# a plotting function
+def plotRegion(reg, list_dictionaries, chooseStructure = None, annotate = True):
+    '''
+    The function used to plot the droplet for examining the boundary definition.
+
+    Input
+    ------
+    reg: 'L1688' or 'B18'
+
+    core: The core number.  From 1 to 12 for 'L1688', and from 1 to 6 for 'B18'.
+          L1688 has an 'extra' core.
+
+    Output
+    ------
+    fig: matplotlib figure instantce
+    '''
+
+    if reg == 'L1688' and chooseStructure in list(range(1, 13))+['extra']:
+        core = chooseStructure
+        plotStructure = True
+    elif reg == 'B18' and chooseStructure in range(1, 7):
+        core = chooseStructure
+        plotStructure = True
+    elif chooseStructure is None:
+        core = -1
+        plotStructure = False
+    else:
+        raise ValueError('"chooseStructure" is an integer. 1-12 for L1688; 1-6 for B18.')
+
+
+    ####
+    dict_data, dict_masks, dict_YSOs, dict_Vlsr_predicted = list_dictionaries
+    header = dict_data[reg]['header_GAS']
+    wcs_GAS = wcs.WCS(header)
+    if reg == 'L1688':
+        frame = (7., 0., 261., 196.2)
+    elif reg == 'B18':
+        frame = (26., -10., 725., 290.)
+
+    if plotStructure:
+        mask = dict_masks[reg][core]
+        frameCore = frameMask(mask)
+
+    list_images = [dict_data[reg]['colden'],
+                   dict_data[reg]['temp'],
+                   dict_data[reg]['Tpeak'],
+                   dict_data[reg]['Tkin'],
+                   dict_data[reg]['Vlsr'],
+                   dict_data[reg]['Sigma']]
+    list_names = [r'$N_{H_2}$',
+                  r'$T_{dust}$',
+                  r'$T_{peak}$',
+                  r'$T_{kin}$',
+                  r'$V_{LSR}$',
+                  r'$\sigma_{{NH}_3}$']
+    norm_Vlsr = colors.Normalize(2.5, 4.5) if reg == 'L1688'\
+                else colors.Normalize(5.5, 7.)
+    list_norms = [colors.LogNorm(1e21, 1e23),
+                  colors.Normalize(0., 30.),
+                  colors.LogNorm(.5, 30.),
+                  colors.Normalize(0., 30.),
+                  norm_Vlsr,
+                  colors.Normalize(.05, .45)]
+    list_cmaps = ['Greys',
+                  'YlOrRd_r',
+                  'Greys',
+                  'YlOrRd_r',
+                  'RdYlBu_r',
+                  'YlGnBu']
+
+    nrows, ncols = 3, 2
+    if reg == 'L1688':
+        fig = plt.figure(figsize = (16., 18.))
+        figLeft, figRight, figBottom, figTop = .085, .985, .07, .98
+        listStructures = list(range(1, 13))+['extra']
+        markersizeYSOs = 8.
+    elif reg == 'B18':
+        fig = plt.figure(figsize = (20., 12.))
+        figLeft, figRight, figBottom, figTop = .085, .985, .09, .99
+        listStructures = range(1, 7)
+        markersizeYSOs = 11.
+
+    gapHorizontal, gapVertical = .005, .01
+    subplotWidth = (figRight-figLeft - gapHorizontal*(ncols-1.))/ncols
+    subplotHeight = (figTop-figBottom - gapVertical*(nrows-1.))/nrows
+
+    scalebar = .5 if reg == 'L1688' else 1.  ## pc
+    pixscale = (distances[reg]*np.radians(abs(header['CDELT1']))).to(u.pc).value
+    scalebar_pix = scalebar/pixscale
+
+    if annotate:
+        fig.text(.5, .0015, 'R.A.[J2000]',
+                 color = 'k',
+                 weight = 'black',
+                 verticalalignment = 'bottom',
+                 horizontalalignment = 'center')
+        fig.text(.005, .5, 'Dec.[J2000]',
+                 rotation = 90.,
+                 color = 'k',
+                 weight = 'black',
+                 verticalalignment = 'center',
+                 horizontalalignment = 'left')
+
+    for i in range(len(list_images)):
+        icol, irow = i%ncols, i//ncols
+        axis = fig.add_axes([figLeft+icol*(subplotWidth+gapHorizontal),
+                            figBottom+(nrows-irow-1)*(subplotHeight+gapVertical),
+                            subplotWidth, subplotHeight],
+                            projection = wcs_GAS)
+
+        image = list_images[i]
+        axis.imshow(image,
+                    cmap = list_cmaps[i],
+                    norm = list_norms[i])
+
+        for j, structure in enumerate(listStructures):
+            axis.contour(dict_masks[reg][structure],
+                         levels = [.5],
+                         colors = 'w',
+                         linewidths = 3.)
+            axis.contour(dict_masks[reg][structure],
+                         levels = [.5],
+                         colors = ssk_colors[j],
+                         linewidths = 2.)
+
+        '''
+        count_image = np.sum(np.isfinite(image[int(frame[1]):int(frame[1]+frame[3]),
+                                               int(frame[0]):int(frame[0]+frame[2])]))
+        count_mask = np.sum(mask)
+        if count_image < 3.*count_mask:
+            axis.contour(mask,
+                         levels = [.5],
+                         colors = 'k',
+                         linewidths = 8.)
+        else:
+            axis.contour(mask,
+                         levels = [.5],
+                         colors = 'w',
+                         linewidths = 8.)
+        '''
+
+        if i in [1, 3]:
+            axis.plot(dict_YSOs[reg][:, 0], dict_YSOs[reg][:, 1],
+                      color = 'orange',
+                      marker = '*',
+                      markersize = markersizeYSOs,
+                      markeredgecolor = 'k',
+                      linestyle = 'none')
+        else:
+            axis.plot(dict_YSOs[reg][:, 0], dict_YSOs[reg][:, 1],
+                      color = 'orange',
+                      marker = '*',
+                      markersize = markersizeYSOs,
+                      markeredgecolor = 'w',
+                      linestyle = 'none')
+
+        if plotStructure:
+            if i in [1, 3, 4]:
+                axis.fill_between([frameCore[0], frameCore[0]+frameCore[2]],
+                                  frameCore[1], frameCore[1]+frameCore[3],
+                                  edgecolor = 'k',
+                                  color = 'none',
+                                  linewidth = 2.)
+            else:
+                axis.fill_between([frameCore[0], frameCore[0]+frameCore[2]],
+                                  frameCore[1], frameCore[1]+frameCore[3],
+                                  edgecolor = 'k',
+                                  color = 'none',
+                                  linewidth = 2.)
+
+        '''
+        if i == 5:
+            Tkin_median = np.nanmedian(dict_data[reg]['Tkin'][mask])
+            NT_sonic = np.sqrt(c.k_B*Tkin_median*u.K/mass['NH3']
+                               +c.k_B*Tkin_median*u.K/mass['average'])
+            NT_sonic = NT_sonic.to(u.km/u.s).value
+            axis.contour((list_images[i] < NT_sonic),
+                         levels = [.5],
+                         colors = 'r',
+                         linewidths = 2.)
+        '''
+
+
+        axis.plot([frame[0]+7./8.*frame[2], frame[0]+7./8.*frame[2]-scalebar_pix],
+                  [frame[1]+1./7.*frame[3], frame[1]+1./7.*frame[3]],
+                  color = 'k',
+                  linewidth = 5.)
+        axis.text(frame[0]+7./8.*frame[2]-.5*scalebar_pix, frame[1]+1./5.*frame[3], '%.1f pc'%scalebar,
+                  color = 'k',
+                  weight = 'bold',
+                  verticalalignment = 'center',
+                  horizontalalignment = 'center')
+        axis.fill_between([frame[0]+7./8.*frame[2]+.1*scalebar_pix, frame[0]+7./8.*frame[2]-1.1*scalebar_pix],
+                          frame[1]+(1./7.+1./5.)/2.*frame[3] - 1./14.*frame[3],
+                          frame[1]+(1./7.+1./5.)/2.*frame[3] + 1./12.*frame[3],
+                          color = 'w',
+                          linewidth = 0.,
+                          alpha = .4)
+        '''
+        axis.fill_between([frame[0]+7./8.*frame[2]+.1*scalebar_pix, frame[0]+7./8.*frame[2]-1.1*scalebar_pix],
+                          frame[1]+(6./7.+4./5.)/2.*frame[3] - 1./14.*frame[3],
+                          frame[1]+(6./7.+4./5.)/2.*frame[3] + 1./14.*frame[3],
+                          color = 'none',
+                          edgecolor = 'k',
+                          linewidth = 1.)
+        '''
+        if annotate:
+            axis.text(frame[0]+.1*frame[2], frame[1]+.9*frame[3], list_names[i],
+                      color = 'k',
+                      weight = 'bold',
+                      horizontalalignment = 'center',
+                      verticalalignment = 'center')
+
+        beam_center = tuple(wcs_GAS.wcs_pix2world([[frame[0]+1./6.*frame[2], frame[1]+1./6.*frame[3]]], 0)[0]*u.deg)
+        beam_size = header['BMAJ']/2. * u.degree
+        beam = wcsaxes.SphericalCircle(beam_center,
+                                       beam_size,
+                                       edgecolor = 'w',
+                                       facecolor = 'k',
+                                       zorder = 999,
+                                       transform = axis.get_transform('fk5'))
+        axis.add_patch(beam)
+
+        if annotate:
+            axis.text(frame[0]+1./6.*frame[2], frame[1]+1./6.*frame[3]+20., 'beam',
+                      style = 'italic',
+                      weight = 'bold',
+                      horizontalalignment = 'center',
+                      verticalalignment = 'center')
+
+        axis.set_xlim(frame[0], frame[0]+frame[2])
+        axis.set_ylim(frame[1], frame[1]+frame[3])
+        axis.coords[0].set_major_formatter('hh:mm')
+        axis.coords[1].set_major_formatter('dd:mm')
         if irow != (nrows-1):
             axis.coords[0].set_ticklabel_visible(False)
         if icol != 0:
