@@ -20,7 +20,7 @@ The project is lead by [Hope Chen](https://github.com/hopehhchen) at Harvard-Smi
 ### A Note on the Idea of Shared Data and Codes
 It has become fashionable to share data and codes in the fast developing field of data science in the study of natural sciences.  However, the lack of a clear guideline for data sharing has often resulted in difficulties to reproduce (and, importantly, test) the results published using the original version of the shared data, and to reuse the shared data in other analyses.
 
-We find an example of a complete set of guidelines presented by [Ellis and Leek](https://doi.org/10.7287/peerj.preprints.3139v2) pretty useful.  [Ellis and Leek](https://doi.org/10.7287/peerj.preprints.3139v2) list the following as "the information you should pass to a statistician":
+We find an example of a complete set of guidelines presented by [Ellis & Leek](https://doi.org/10.7287/peerj.preprints.3139v2) very useful.  [Ellis & Leek](https://doi.org/10.7287/peerj.preprints.3139v2) list the following as "the information you should pass to a statistician":
 
 1. The raw data
 2. A tidy data set
