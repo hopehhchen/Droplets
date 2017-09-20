@@ -411,6 +411,8 @@ def plotDroplet(reg, core, list_dictionaries, annotate = True):
         axis.set_xlim(frame[0], frame[0]+frame[2])
         axis.set_ylim(frame[1], frame[1]+frame[3])
         axis.coords[0].set_major_formatter('hh:mm:ss')
+        axis.coords[0].set_ticks(size = 8.)
+        axis.coords[1].set_ticks(size = 8.)
         if irow != (nrows-1):
             axis.coords[0].set_ticklabel_visible(False)
         if icol != 0:
@@ -580,10 +582,20 @@ def plotRegion(reg, list_dictionaries, chooseStructure = None, annotate = True):
             if i in [1, 3, 4]:
                 axis.fill_between([frameCore[0], frameCore[0]+frameCore[2]],
                                   frameCore[1], frameCore[1]+frameCore[3],
+                                  edgecolor = 'w',
+                                  color = 'none',
+                                  linewidth = 3.)
+                axis.fill_between([frameCore[0], frameCore[0]+frameCore[2]],
+                                  frameCore[1], frameCore[1]+frameCore[3],
                                   edgecolor = 'k',
                                   color = 'none',
                                   linewidth = 2.)
             else:
+                axis.fill_between([frameCore[0], frameCore[0]+frameCore[2]],
+                                  frameCore[1], frameCore[1]+frameCore[3],
+                                  edgecolor = 'w',
+                                  color = 'none',
+                                  linewidth = 3.)
                 axis.fill_between([frameCore[0], frameCore[0]+frameCore[2]],
                                   frameCore[1], frameCore[1]+frameCore[3],
                                   edgecolor = 'k',
@@ -654,6 +666,8 @@ def plotRegion(reg, list_dictionaries, chooseStructure = None, annotate = True):
         axis.set_ylim(frame[1], frame[1]+frame[3])
         axis.coords[0].set_major_formatter('hh:mm')
         axis.coords[1].set_major_formatter('dd:mm')
+        axis.coords[0].set_ticks(size = 8.)
+        axis.coords[1].set_ticks(size = 8.)
         if irow != (nrows-1):
             axis.coords[0].set_ticklabel_visible(False)
         if icol != 0:
