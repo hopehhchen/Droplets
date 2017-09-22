@@ -15,6 +15,11 @@ rcParams['lines.markersize'] = 20
 rcParams['image.cmap'] = 'viridis'
 rcParams['image.interpolation'] = 'none'
 rcParams['image.origin'] = 'bottom'
+# ticks
+rcParams['xtick.major.size'] = 8.
+rcParams['xtick.minor.size'] = 4.
+rcParams['ytick.major.size'] = 8.
+rcParams['ytick.minor.size'] = 4.
 # patch
 rcParams['patch.facecolor'] = 'yellow'
 rcParams['patch.edgecolor'] = 'none'

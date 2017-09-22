@@ -218,6 +218,7 @@ def readGradient(gradfit, fitter, header, reg):
     return GradMag, eGradMag, GradPA, eGradPA
 
 
+#### blow are plotting functions; consider moving to a separate script for orga
 # a plotting function
 def plotDroplet(reg, core, list_dictionaries, annotate = True):
     '''
@@ -675,3 +676,6 @@ def plotRegion(reg, list_dictionaries, chooseStructure = None, annotate = True):
 
 
     return fig
+
+
+# a plotting function
