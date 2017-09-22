@@ -18,8 +18,10 @@ rcParams['image.origin'] = 'bottom'
 # ticks
 rcParams['xtick.major.size'] = 8.
 rcParams['xtick.minor.size'] = 4.
+rcParams['xtick.direction'] = 'in'
 rcParams['ytick.major.size'] = 8.
 rcParams['ytick.minor.size'] = 4.
+rcParams['ytick.direction'] = 'in'
 # patch
 rcParams['patch.facecolor'] = 'yellow'
 rcParams['patch.edgecolor'] = 'none'
