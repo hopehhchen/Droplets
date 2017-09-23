@@ -684,7 +684,6 @@ def plotRegion(reg, list_dictionaries, chooseStructure = None, annotate = True):
 
 # a plotting function
 def plotTpeakSigma(list_dictionaries, xscale = 'log'):
-    xscale = 'linear'
 
     ###
     rcParams['figure.subplot.left'] = .09
