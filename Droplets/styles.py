@@ -28,6 +28,8 @@ rcParams['patch.edgecolor'] = 'none'
 # font
 rcParams['font.size'] = 28
 rcParams['font.family'] = 'StixGeneral'
+# mathtext
+rcParams['mathtext.fontset'] = 'stix'
 # legend
 rcParams['legend.frameon'] = False
 rcParams['legend.scatterpoints'] = 1
