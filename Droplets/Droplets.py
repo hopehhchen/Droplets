@@ -23,6 +23,7 @@ from matplotlib import rcParams
 import pandas as pd
 
 #
+from statBasic2D import *
 from constants import *
 from ssk_colors import *
 from plot_tools import *
@@ -857,6 +858,373 @@ def plotTpeakSigma(list_dictionaries, xscale = 'log'):
              weight = 'bold',
              horizontalalignment = 'center',
              verticalalignment = 'center')
+
+    import styles
+
+    return fig
+
+def plotSigmas(list_dictionaries, plotSigma = 'sigma', plotRfromA = False):
+
+
+
+    ###
+    rcParams['figure.subplot.left'] = .09
+    rcParams['figure.subplot.right'] = .97
+    rcParams['figure.subplot.bottom'] = .12
+    rcParams['figure.subplot.top'] = .96
+    rcParams['font.size'] = 30
+    ###
+    dict_data, dict_masks, dict_YSOs, dict_Vlsr_predicted = list_dictionaries
+
+    #ncols, nrows = 5, 4
+    fig = plt.figure(figsize = (16., 18.))
+
+    #Dmax = .145
+    #Dmax = 1.3*0.10796408847 ####
+    Dmax = .13
+    rmin, rmax = 0., Dmax
+    rbins = np.linspace(rmin, rmax, 12)  ####
+    ymin, ymax = .02, .65
+
+    #
+    SigmaNT_Sonic = (np.sqrt(c.k_B*10.*u.K/(2.37*u.u))).to(u.km/u.s).value
+    SigmaNT_halfSonic = (np.sqrt(.5**2.*c.k_B*10.*u.K/(2.37*u.u))).to(u.km/u.s).value
+    #
+    Sigma_SonicNT = (np.sqrt(c.k_B*10.*u.K/(17.031*u.u)+c.k_B*10.*u.K/(2.37*u.u))).to(u.km/u.s).value
+    Sigma_halfSonicNT = (np.sqrt((c.k_B*10.*u.K/(17.031*u.u)+.5**2.*c.k_B*10.*u.K/(2.37*u.u)))).to(u.km/u.s).value
+
+    #
+    figLeft, figRight, figBottom, figTop = .06, .99, .055, .9
+    gapHorizontal, gapVertical = .005, .005
+    gapReg = .055 ## horizontal
+    gapExtra = .055 ## Vertical
+    frameWidth = (figRight-figLeft-gapReg-3.*gapHorizontal)/5.
+    frameHeight = (figTop-figBottom-4.*gapVertical)/5.
+    dict_frames = {'L1688': [], 'B18': []}
+    ## L1688
+    for i in range(12):
+        irow, icol = i//3, i%3
+        frame = fig.add_axes([figLeft+gapReg+gapHorizontal+2.*frameWidth+icol*(frameWidth+gapHorizontal),
+                              figBottom+gapExtra+frameHeight+(4-irow-1)*(frameHeight+gapVertical),
+                              frameWidth, frameHeight])
+        dict_frames['L1688'].append(frame)
+    frame = fig.add_axes([figLeft+gapReg+gapHorizontal+2.*frameWidth,
+                          figBottom,
+                          frameWidth, frameHeight])
+    dict_frames['L1688'].append(frame)
+    ## B18
+    for i in range(6):
+        irow, icol = i//2, i%2
+        frame = fig.add_axes([figLeft+icol*(frameWidth+gapHorizontal),
+                              figBottom+gapExtra+frameHeight+(4-irow-1)*(frameHeight+gapVertical),
+                              frameWidth, frameHeight])
+        dict_frames['B18'].append(frame)
+
+    #
+    lineSpacing = .026
+
+    for i in range(19):
+
+        # list of structures
+        if i < 13:
+            reg = 'L1688'
+            listStructures = list(range(1, 13))+['extra']
+            structure = listStructures[i]
+            axis = dict_frames[reg][i]
+            #j = i
+        else:
+            reg = 'B18'
+            listStructures = range(1, 7)
+            structure = listStructures[i-13]
+            axis = dict_frames[reg][i-13]
+            #j = i-13
+
+
+        hdr = dict_data[reg]['header_GAS']
+        mapNT = dict_data[reg]['SigmaNT']
+        mapT = dict_data[reg]['SigmaT']
+        mapSigma = dict_data[reg]['Sigma']
+        mask = dict_masks[reg][structure]
+        #maskFinite = np.isfinite(mapNT)&np.isfinite(mapT)
+        distance = distances[reg]
+
+        # deriving the profile for pixels within Dmax
+        ## centroid
+        meshx, meshy = np.meshgrid(np.arange(mask.shape[1]), np.arange(mask.shape[0]))
+        cenx, ceny = np.mean(meshx[mask]), np.mean(meshy[mask])
+        ## distance
+        meshrPix = np.hypot(meshx-cenx, meshy - ceny)
+        meshr = (meshrPix*np.radians(abs(hdr['CDELT1']))*distance).to(u.pc).value
+        ## effective radius
+        stat = statBasic2D(mask.astype(float)[mask], (meshy[mask], meshx[mask]))
+        stat.calculate()
+        Reff = (stat.radius.value*np.radians(abs(hdr['CDELT1']))*distance).to(u.pc).value
+        Reff *= (2.*np.sqrt(2.*np.log(2.))) #FWHM as in Goodman+ 93
+        Reff2 = (np.sqrt(stat.area_exact.value/np.pi)*np.radians(abs(hdr['CDELT1']))*distance).to(u.pc).value
+        Reff_low = np.arange(1., 30.)[np.array([np.sum(meshrPix<r)!=np.sum(mask&(meshrPix<r))
+                                                for r in np.arange(1., 30.)])][0]
+        Reff_low = (Reff_low*np.radians(abs(hdr['CDELT1']))*distance).to(u.pc).value
+        Reff_low = min(Reff_low, Reff-(1.*np.radians(abs(hdr['CDELT1']))*distance).to(u.pc).value)
+        Reff_high = np.arange(1., 30.)[np.array([np.sum(mask&(meshrPix<r))==np.sum(mask)
+                                                 for r in np.arange(1., 30.)])][0]
+        Reff_high = (Reff_high*np.radians(abs(hdr['CDELT1']))*distance).to(u.pc).value
+        Reff_high = max(Reff_low, Reff+(1.*np.radians(abs(hdr['CDELT1']))*distance).to(u.pc).value)
+
+        if plotSigma == 'components':
+            ## points within the mask
+            mask_in = mask
+            ptr_in, ptNT_in, ptT_in = meshr[mask_in], mapNT[mask_in], mapT[mask_in]
+            ## all points within Dmax
+            mask_all = (meshr < Dmax)
+            ptr_all, ptNT_all, ptT_all = meshr[mask_all], mapNT[mask_all], mapT[mask_all]
+            ### bin the points
+            binCent_all = rbins[:-1] + .5*np.diff(rbins)
+            binNT_all = np.array([np.nanmedian(ptNT_all[(ptr_all >= rbins[k])&(ptr_all < rbins[k+1])])\
+                                  for k in range(len(rbins)-1)])
+            binNTstd_all = np.array([np.nanstd(ptNT_all[(ptr_all >= rbins[k])&(ptr_all < rbins[k+1])])\
+                                     for k in range(len(rbins)-1)])
+            binT_all = np.array([np.nanmedian(ptT_all[(ptr_all >= rbins[k])&(ptr_all < rbins[k+1])])\
+                                 for k in range(len(rbins)-1)])
+            binTstd_all = np.array([np.nanstd(ptT_all[(ptr_all >= rbins[k])&(ptr_all < rbins[k+1])])\
+                                    for k in range(len(rbins)-1)])
+
+            # plotting
+            # plot
+            #axis = ax[i//ncols, i%ncols]
+            ## points within the mask
+            ### property A
+            axis.plot(ptr_in, ptNT_in,
+                      linestyle = 'none',
+                      linewidth = 0.,
+                      marker = 'o',
+                      color = ssk_colors[2],
+                      markeredgecolor = 'none',
+                      markersize = 4.)
+            ### property B
+            axis.plot(ptr_in, ptT_in,
+                      linestyle = 'none',
+                      linewidth = 0.,
+                      marker = 'o',
+                      color = ssk_colors[0],
+                      markeredgecolor = 'none',
+                      markersize = 4.)
+            ### bins of all
+            axis.fill_between(binCent_all, binNT_all-.5*binNTstd_all, binNT_all+.5*binNTstd_all,
+                              color = ssk_colors[2],
+                              linewidth = 0.,
+                              edgecolor = 'none',
+                              alpha = .15)
+
+            axis.fill_between(binCent_all, binT_all-.5*binTstd_all, binT_all+.5*binTstd_all,
+                              color = ssk_colors[0],
+                              linewidth = 0.,
+                              edgecolor = 'none',
+                              alpha = .15)
+        elif plotSigma == 'sigma':
+            ## points within the mask
+            mask_in = mask
+            ptr_in, ptSigma_in = meshr[mask_in], mapSigma[mask_in]
+            ## all points within Dmax
+            mask_all = (meshr < Dmax)
+            ptr_all, ptSigma_all = meshr[mask_all], mapSigma[mask_all]
+            ### bin the points
+            binCent_all = rbins[:-1] + .5*np.diff(rbins)
+            binSigma_all = np.array([np.nanmedian(ptSigma_all[(ptr_all >= rbins[k])&(ptr_all < rbins[k+1])])\
+                                     for k in range(len(rbins)-1)])
+            binSigmastd_all = np.array([np.nanstd(ptSigma_all[(ptr_all >= rbins[k])&(ptr_all < rbins[k+1])])\
+                                        for k in range(len(rbins)-1)])
+
+            # plotting
+            # plot
+            #axis = ax[i//ncols, i%ncols]
+            ## points within the mask
+            ### property A
+            axis.plot(ptr_in, ptSigma_in,
+                      linestyle = 'none',
+                      linewidth = 0.,
+                      marker = 'o',
+                      color = ssk_colors[1],
+                      markeredgecolor = 'none',
+                      markersize = 4.)
+            ### bins of all
+            axis.fill_between(binCent_all, binSigma_all-.5*binSigmastd_all, binSigma_all+.5*binSigmastd_all,
+                              color = ssk_colors[1],
+                              linewidth = 0.,
+                              edgecolor = 'none',
+                              alpha = .15)
+
+
+
+        ## effective radius used to calculate the physical properties
+        '''
+        axis.fill_between([.045, .055], ymin, ymax,
+                           edgecolor = 'k',
+                           facecolor = 'none',
+                           alpha = .55,
+                           hatch = '//////',
+                           linewidth = .01)
+        '''
+
+        axis.fill_between([Reff_low, Reff_high], ymin, ymax,
+                           facecolor = 'k',
+                           edgecolor = 'none',
+                           alpha = .1)
+        axis.vlines(Reff, ymin, ymax,
+                    linestyle = '-',
+                    color = 'k')
+        if plotRfromA:
+            axis.vlines(Reff2, ymin, ymax,
+                        linestyle = '--',
+                        color = 'k')
+
+
+        ### Plot the expected line widths
+        axis.hlines([SigmaNT_Sonic, SigmaNT_halfSonic], rmin, rmax,
+                    linestyles = ['--', ':'],
+                    colors = 'k')
+        axis.text(.125, SigmaNT_Sonic+.02, '$c_{s, ave}$',
+                  size = 20,
+                  horizontalalignment = 'right')
+        axis.text(.125, SigmaNT_halfSonic+.02, '$0.5c_{s, ave}$',
+                  size = 20,
+                  horizontalalignment = 'right')
+
+        # annotation
+        axis.text(.12, .6, str(structure).capitalize(),
+                  size = 26,
+                  horizontalalignment = 'right',
+                  verticalalignment = 'top')
+
+        ## adjust the subplot
+        ### tick labels
+        if i not in [0, 3, 6, 9, 12, 13, 15, 17]:
+            axis.set_yticks([.3, .6])
+            axis.set_yticklabels([])
+        else:
+            axis.set_yticks([.3, .6])
+            axis.tick_params(axis='y', which='major', labelsize=24)
+            axis.yaxis.labelpad = -1.5
+
+        if i not in [9, 10, 11, 12, 17, 18]:
+            axis.set_xticks([.05, .1])
+            axis.set_xticklabels([])
+        else:
+            axis.set_xticks([.05, .1])
+            labels = axis.get_xticklabels()
+            axis.tick_params(axis='x', which='major', labelsize=24)
+            #axis.xaxis.labelpad = -5.
+            #plt.setp(labels, rotation=330)
+
+        if i in [9, 12, 17]:
+            axis.set_xlabel('$R_{eff}$ [pc]')
+            axis.set_ylabel('$\sigma_{NT}$/$\sigma_{T}$ [km s$^{-1}$]')
+        ### axis labels
+        #if (i//ncols == (nrows-1)) and (i%ncols == 0):
+        #    axis.set_xlabel('Distance [pc]')
+        #    axis.set_ylabel(r'$\sigma$ [km s$^{-1}$]')
+        ### limits
+        axis.set_xlim(rmin, rmax)
+        axis.set_ylim(ymin, ymax)
+
+    fig.text(.075, .97, 'B18',
+             size = 34,
+             weight = 'black',
+             horizontalalignment = 'left',
+             verticalalignment = 'center')
+    fig.text(figLeft+gapHorizontal+gapReg+2.*frameWidth+.015, .97, 'L1688',
+             size = 34,
+             weight = 'black',
+             horizontalalignment = 'left',
+             verticalalignment = 'center')
+
+    # legend
+    if plotSigma == 'components':
+        #
+        fig.text(figLeft+gapHorizontal, figBottom+4.*lineSpacing,
+                 '$\sigma_{T}$ of Pixels Inside',
+                 size = 30,
+                 color = ssk_colors[0],
+                 horizontalalignment = 'left',
+                 verticalalignment = 'bottom')
+        fig.text(figLeft+gapHorizontal, figBottom+3.*lineSpacing,
+                 '$\sigma_{T}$ of All Pixels (binned; 1-$\sigma$)',
+                 size = 30,
+                 color = ssk_colors[0],
+                 alpha = .45,
+                 horizontalalignment = 'left',
+                 verticalalignment = 'bottom')
+        fig.text(figLeft+gapHorizontal, figBottom+2.*lineSpacing,
+                 '$\sigma_{NT}$ of Pixels Inside',
+                 size = 30,
+                 color = ssk_colors[2],
+                 horizontalalignment = 'left',
+                 verticalalignment = 'bottom')
+        fig.text(figLeft+gapHorizontal, figBottom+1.*lineSpacing,
+                 '$\sigma_{NT}$ of All Pixels (binned; 1-$\sigma$)',
+                 size = 30,
+                 color = ssk_colors[2],
+                 alpha = .45,
+                 horizontalalignment = 'left',
+                 verticalalignment = 'bottom')
+        fig.text(figLeft+gapHorizontal, figBottom,
+                 '$R_{eff}$',
+                 size = 30,
+                 color = 'k',
+                 horizontalalignment = 'left',
+                 verticalalignment = 'bottom')
+
+        axfig = fig.add_axes([0., 0., 1., 1.])
+        axfig.plot([figLeft+gapHorizontal+2.*frameWidth, figRight],
+                   [figBottom+frameHeight+1.5*gapVertical, figBottom+frameHeight+1.5*gapVertical],
+                   'k-')
+        axfig.fill_between([figLeft, figLeft+2.*frameWidth],
+                           figBottom-.2*lineSpacing,
+                           figBottom+5.2*lineSpacing,
+                           color = 'gray',
+                           linewidth = 0.,
+                           alpha = .15,
+                           zorder = 999)
+    elif plotSigma == 'sigma':
+
+        #
+        fig.text(figLeft+gapHorizontal, figBottom+2.*lineSpacing,
+                 '$\sigma_{{NH}_3}$ of Pixels Inside',
+                 size = 30,
+                 color = ssk_colors[1],
+                 horizontalalignment = 'left',
+                 verticalalignment = 'bottom')
+        fig.text(figLeft+gapHorizontal, figBottom+1.*lineSpacing,
+                 '$\sigma_{{NH}_3}$ of All Pixels (binned; 1-$\sigma$)',
+                 size = 30,
+                 color = ssk_colors[1],
+                 alpha = .45,
+                 horizontalalignment = 'left',
+                 verticalalignment = 'bottom')
+        fig.text(figLeft+gapHorizontal, figBottom,
+                 '$R_{eff}$',
+                 size = 30,
+                 color = 'k',
+                 horizontalalignment = 'left',
+                 verticalalignment = 'bottom')
+
+        axfig = fig.add_axes([0., 0., 1., 1.])
+        axfig.plot([figLeft+gapHorizontal+2.*frameWidth, figRight],
+                   [figBottom+frameHeight+1.5*gapVertical, figBottom+frameHeight+1.5*gapVertical],
+                   'k-')
+        axfig.fill_between([figLeft, figLeft+2.*frameWidth],
+                           figBottom-.2*lineSpacing,
+                           figBottom+3.2*lineSpacing,
+                           color = 'gray',
+                           linewidth = 0.,
+                           alpha = .15,
+                           zorder = 999)
+
+    axfig.set_xlim(0., 1.)
+    axfig.set_ylim(0., 1.)
+    axfig.set_xticks([])
+    axfig.set_yticks([])
+    for sp in ['left', 'right', 'bottom', 'top']:
+        axfig.spines[sp].set_visible(False)
 
     import styles
 

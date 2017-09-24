@@ -1,6 +1,7 @@
 import matplotlib.colors as colors
 import matplotlib.cm as cm
 
+import styles
 
 ssk_colors = ['#CE313D', '#006C4F', '#465DAA',
               '#CB4B94', '#D99502', '#0087AA',
