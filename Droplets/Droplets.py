@@ -877,7 +877,7 @@ def plotSigmas(list_dictionaries, plotSigma = 'sigma', plotRfromA = False):
     dict_data, dict_masks, dict_YSOs, dict_Vlsr_predicted = list_dictionaries
 
     #ncols, nrows = 5, 4
-    fig = plt.figure(figsize = (16., 18.))
+    fig = plt.figure(figsize = (18., 18.))
 
     #Dmax = .145
     #Dmax = 1.3*0.10796408847 ####
@@ -1079,15 +1079,26 @@ def plotSigmas(list_dictionaries, plotSigma = 'sigma', plotRfromA = False):
 
 
         ### Plot the expected line widths
-        axis.hlines([SigmaNT_Sonic, SigmaNT_halfSonic], rmin, rmax,
-                    linestyles = ['--', ':'],
-                    colors = 'k')
-        axis.text(.125, SigmaNT_Sonic+.02, '$c_{s, ave}$',
-                  size = 20,
-                  horizontalalignment = 'right')
-        axis.text(.125, SigmaNT_halfSonic+.02, '$0.5c_{s, ave}$',
-                  size = 20,
-                  horizontalalignment = 'right')
+        if plotSigma == 'components':
+            axis.hlines([SigmaNT_Sonic, SigmaNT_halfSonic], rmin, rmax,
+                        linestyles = ['--', ':'],
+                        colors = 'k')
+            axis.text(.125, SigmaNT_Sonic+.02, '$c_{s, ave}$',
+                      size = 20,
+                      horizontalalignment = 'right')
+            axis.text(.125, SigmaNT_halfSonic+.02, '$0.5c_{s, ave}$',
+                      size = 20,
+                      horizontalalignment = 'right')
+        elif plotSigma == 'sigma':
+            axis.hlines([Sigma_SonicNT, Sigma_halfSonicNT], rmin, rmax,
+                        linestyles = ['--', ':'],
+                        colors = 'k')
+            axis.text(.125, Sigma_SonicNT+.02, '$\sigma_{NT}=c_{s, ave}$',
+                      size = 20,
+                      horizontalalignment = 'right')
+            axis.text(.125, Sigma_halfSonicNT+.02, '$\sigma_{NT}=0.5c_{s, ave}$',
+                      size = 20,
+                      horizontalalignment = 'right')
 
         # annotation
         axis.text(.12, .6, str(structure).capitalize(),
