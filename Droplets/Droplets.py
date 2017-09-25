@@ -345,7 +345,8 @@ def plotDroplet(reg, core, list_dictionaries, annotate = True):
 
 
         if i == 3:
-            Tkin_median = np.nanmedian(dict_data[reg]['Tkin'][mask])
+            Tkin_median = np.nanmedian(dict_data[reg]['Tkin'][int(frame[1]):int(frame[1]+frame[3]),
+                                                              int(frame[0]):int(frame[0]+frame[2])])
             NT_sonic = np.sqrt(c.k_B*Tkin_median*u.K/mass['NH3']
                                +c.k_B*Tkin_median*u.K/mass['average'])
             NT_sonic = NT_sonic.to(u.km/u.s).value
