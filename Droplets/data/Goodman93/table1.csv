@@ -1,4 +1,4 @@
-ID,Distance,RA,Dec,Vlsr,FWHM,M,major,minor,PA,AR
+ID,Distance,RA,Dec,Vlsr,FWHMTot,M,major,minor,PA,AspectRatio
 PER3,350,3h25m37.5s,30d55m20s,4.1,0.58,35,0.42,0.10,48,0.24
 PER6,350,3h27m10.3s,30d12m34s,5.8,0.53,20,0.24,0.10,29,0.42
 B5,350,3h44m28.7s,32d44m30s,10.2,0.55,140,0.72,0.29,8,0.39
