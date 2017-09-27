@@ -1199,7 +1199,11 @@ def plotSigmas(list_dictionaries, plotSigma = 'sigma', plotRfromA = False):
 
         if i in [9, 12, 17]:
             axis.set_xlabel('$R_{eff}$ [pc]')
-            axis.set_ylabel('$\sigma_{NT}$/$\sigma_{T}$ [km s$^{-1}$]')
+
+            if plotSigma == 'sigma':
+                axis.set_ylabel('$\sigma_{{NH}_3}$ [km s$^{-1}$]')
+            elif plotSigma == 'components':
+                axis.set_ylabel('$\sigma_{NT}$ or $\sigma_{T}$ [km s$^{-1}$]')
         ### axis labels
         #if (i//ncols == (nrows-1)) and (i%ncols == 0):
         #    axis.set_xlabel('Distance [pc]')
