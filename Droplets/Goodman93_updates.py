@@ -65,7 +65,7 @@ table1_updated['M'] = table1['M']*(2.37/2.33)*(table1_updated['Distance']/table1
 table1_updated['major'] = table1['major']*(table1_updated['Distance']/table1['Distance'])
 ## minor FWHM
 table1_updated['minor'] = table1['minor']*(table1_updated['Distance']/table1['Distance'])
-## R
+## R (FWHM)
 table1_updated['R'] = np.sqrt(table1_updated['major']*table1_updated['minor'])
 
 
