@@ -225,6 +225,76 @@ def readGradient(gradfit, fitter, header, reg):
 
 #### blow are plotting functions; consider moving to a separate script for orga
 # a plotting function
+def plotTable1Sigmas(table1, plotNewWeight = True):
+
+    # Read values of Tkin and SigmaNH3 from BM and Ladd+94.
+    SigmaNH3 = table1['SigmaNH3'].values   ## in km/s
+    Tkin = table1['Tkin'].values   ## in Kelvin
+
+    # SigmaTot from Goodman93 Table1
+    SigmaTot0 = table1['SigmaTot'].values
+    # SigmaTot using Tkin and SigmaNH3 from BM and Ladd+94, assuming 2.33 a.m.u.
+    SigmaTot1 = np.sqrt((SigmaNH3*u.km/u.s)**2.
+                        -c.k_B*Tkin*u.K/mass['NH3']
+                        +c.k_B*Tkin*u.K/(2.33*u.u)).to(u.km/u.s).value
+    # SigmaTot using Tkin and SigmaNH3 from BM and Ladd+94, assuming 2.37 a.m.u.
+    SigmaTot2 = np.sqrt((SigmaNH3*u.km/u.s)**2.
+                        -c.k_B*Tkin*u.K/mass['NH3']
+                        +c.k_B*Tkin*u.K/mass['average']).to(u.km/u.s).value
+
+    # Plot and examine.
+    fig = plt.figure(figsize = (14., 10.))
+    ax = fig.gca()
+    if plotNewWeight:
+        ax.set_ylim(.18, .51)
+    else:
+        ax.set_ylim(.18, .47)
+
+    ax.plot(SigmaTot0,
+            linestyle = 'none',
+            marker = '.',
+            markersize = 32.,
+            markeredgecolor = ssk_colors[3],
+            markerfacecolor = colors.to_rgba(ssk_colors[3], alpha = .2),
+            lw = 3.,
+            label = '$\sigma_{tot}$ from Goodman+93')
+    ax.plot(SigmaTot1,
+            linestyle = 'none',
+            marker = '.',
+            markersize = 32.,
+            markeredgecolor = ssk_colors[5],
+            markerfacecolor = colors.to_rgba(ssk_colors[5], alpha = .2),
+            lw = 3.,
+            label = 'based on $T_{kin}$ and $\sigma_{{NH}_3}$ from BM and Ladd+94,\nassuming 2.33 a.m.u.')
+    if plotNewWeight:
+        ax.plot(SigmaTot2,
+                linestyle = 'none',
+                marker = '.',
+                markersize = 32.,
+                markeredgecolor = ssk_colors[4],
+                markerfacecolor = colors.to_rgba(ssk_colors[4], alpha = .2),
+                lw = 3.,
+                label = 'based on $T_{kin}$ and $\sigma_{{NH}_3}$ from BM and Ladd+94,\nassuming 2.37 a.m.u.')
+
+    ax.vlines(range(len(SigmaTot0)), *ax.get_ylim(),
+              linestyle = ':')
+
+    ax.legend(loc = 'upper left',
+              fontsize = 22,
+              frameon = True,
+              edgecolor = 'none',
+              facecolor = 'w',
+              framealpha = .85)
+    ax.set_xticks(range(len(SigmaTot0)))
+    ax.set_xticklabels(table1['ID'].values,
+                       size = 14.,
+                       rotation = 90)
+    ax.set_xlim(.5, len(SigmaTot0)-.5)
+    ax.set_ylabel('$\sigma_{tot}$ [km s$^{-1}$]')
+
+    return fig, ax
+
+# a plotting function
 def plotDroplet(reg, core, list_dictionaries, annotate = True):
     '''
     The function used to plot the droplet for examining the boundary definition.

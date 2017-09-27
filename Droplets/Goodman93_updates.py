@@ -11,6 +11,9 @@ from astropy.coordinates import SkyCoord, FK4, FK5
 #
 import pandas as pd
 
+#
+import styles
+
 
 #### conversion is done below
 
