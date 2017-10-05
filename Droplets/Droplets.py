@@ -367,6 +367,16 @@ def plotDroplet(reg, core, list_dictionaries, annotate = True):
     scalebar = scalebar[np.argmin(abs(scalebar_pix-.25*frame[2]))]
     scalebar_pix = scalebar_pix[np.argmin(abs(scalebar_pix-.25*frame[2]))]
 
+
+    # centroid ####
+    mapTpeak = dict_data[reg]['Tpeak']
+    meshx, meshy = np.meshgrid(np.arange(mask.shape[1]), np.arange(mask.shape[0]))
+    #stat = statBasic2D(mask.astype(float)[mask], (meshy[mask], meshx[mask])) ## no weighting
+    stat = statBasic2D(mapTpeak[mask], (meshy[mask], meshx[mask])) ## weight by Tpeak
+    stat.calculate()
+    ceny, cenx = stat.mom1
+
+
     if annotate:
         fig.text(.5, .0015, 'R.A.[J2000]',
                  color = 'k',
@@ -412,6 +422,27 @@ def plotDroplet(reg, core, list_dictionaries, annotate = True):
                   markeredgecolor = 'w',
                   markeredgewidth = 2.,
                   linestyle = 'none')
+
+        '''
+        # This is for plotting the shadow of the crosshair that shows the cent.
+        axis.plot(cenx, ceny,
+                  color = 'r',
+                  marker = '+',
+                  markersize = 43.,
+                  markeredgecolor = 'w',
+                  markeredgewidth = 7.,
+                  linestyle = 'none',
+                  zorder = 1000)
+        '''
+        # centroid
+        axis.plot(cenx, ceny,
+                  color = 'r',
+                  marker = '+',
+                  markersize = 42.,
+                  markeredgecolor = 'r',
+                  markeredgewidth = 3.,
+                  linestyle = 'none',
+                  zorder = 1001)
 
 
         if i == 3:
@@ -1012,6 +1043,7 @@ def plotSigmas(list_dictionaries, plotSigma = 'sigma', plotRfromA = False):
 
 
         hdr = dict_data[reg]['header_GAS']
+        mapTpeak = dict_data[reg]['Tpeak']
         mapNT = dict_data[reg]['SigmaNT']
         mapT = dict_data[reg]['SigmaT']
         mapSigma = dict_data[reg]['Sigma']
@@ -1020,15 +1052,17 @@ def plotSigmas(list_dictionaries, plotSigma = 'sigma', plotRfromA = False):
         distance = distances[reg]
 
         # deriving the profile for pixels within Dmax
-        ## centroid
+        ## statBasic2D (modified based on astrodendro)
         meshx, meshy = np.meshgrid(np.arange(mask.shape[1]), np.arange(mask.shape[0]))
-        cenx, ceny = np.mean(meshx[mask]), np.mean(meshy[mask])
+        #stat = statBasic2D(mask.astype(float)[mask], (meshy[mask], meshx[mask])) ## no weighting
+        stat = statBasic2D(mapTpeak[mask], (meshy[mask], meshx[mask])) ## weight by Tpeak
+        stat.calculate()
+        ## centroid
+        ceny, cenx = stat.mom1
         ## distance
         meshrPix = np.hypot(meshx-cenx, meshy - ceny)
         meshr = (meshrPix*np.radians(abs(hdr['CDELT1']))*distance).to(u.pc).value
         ## effective radius
-        stat = statBasic2D(mask.astype(float)[mask], (meshy[mask], meshx[mask]))
-        stat.calculate()
         Reff = (stat.radius.value*np.radians(abs(hdr['CDELT1']))*distance).to(u.pc).value
         Reff *= (2.*np.sqrt(2.*np.log(2.))) #FWHM as in Goodman+ 93
         Reff2 = (np.sqrt(stat.area_exact.value/np.pi)*np.radians(abs(hdr['CDELT1']))*distance).to(u.pc).value
