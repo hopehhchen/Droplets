@@ -9,7 +9,8 @@ import astropy.constants as c
 import styles
 
 # distances to the regions
-distances = {'L1688': 137.3*u.pc, 'B18': 135.*u.pc}
+distances = {'L1688': 137.3*u.pc, 'B18': 135.*u.pc,
+             'L1688_e': 6.*u.pc, 'B18_e': 20.*u.pc}
 
 # mass of the NH3 molecule and an average particle in ISM.
 mass = {'NH3': 17.031*u.u, 'average': 2.37*u.u}

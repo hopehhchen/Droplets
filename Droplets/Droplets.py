@@ -23,7 +23,7 @@ from matplotlib import rcParams
 import pandas as pd
 
 #
-from statBasic2D import *
+from stat_tools import *
 from constants import *
 from ssk_colors import *
 from plot_tools import *
