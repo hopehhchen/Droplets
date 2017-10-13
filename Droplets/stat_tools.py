@@ -92,65 +92,55 @@ class statBasic2D(object):
         self.area_exact = len(set(indices)) * dx ** 2
 
 
+class statGrad(object):
 
-def statGrad(Vlsr, Vlsr_err, mask, region, distance):
-    '''
-    The function used to fit for the velocity gradient.
-    '''
+    def __init__(dict_data, dict_masks, region, structureID):
 
-    # setup
-    mask = mask.copy()
-    Vmap = np.zeros(Vlsr.shape)*np.nan
-    Vmap[mask] = Vlsr[mask]
-    VmapErr = np.zeros(Vlsr_err.shape)*np.nan
-    VmapErr[mask] = Vlsr_err[mask]
-    Meshmap1, Meshmap0 = np.meshgrid(np.arange(Vmap.shape[1]), np.arange(Vmap.shape[0]))
-    Meshmap1, Meshmap0 = Meshmap1-np.mean(Meshmap1[mask]),\
-                         Meshmap0-np.mean(Meshmap0[mask]) ## shifted w.r.t. the centroid
-    #nERRestimators = 3*np.sum(mask)
+        self.Vlsr = dict_data[region]['Vlsr']
+        self.eVlsr = dict_data[region]['eVlsr']
+        self.mask = dict_masks[region][structureID]
 
+        xmesh, ymesh = np.meshgrid(np.arange(self.Vlsr.shape[1]),
+                                   np.arange(self.Vlsr.shape[0]))
 
-    # fitting
-    z = Vmap[np.isfinite(Vmap)]
-    x = Meshmap0[np.isfinite(Vmap)]
-    y = Meshmap1[np.isfinite(Vmap)]
-    w = 1./VmapErr[np.isfinite(Vmap)]**2.
-    #w = w/np.sum(w)*(len(x)-3)
+        z = self.Vlsr[self.mask & np.isfinite(self.Vlsr)]
+        x, y = xmesh[self.mask & np.isfinite(self.Vlsr)],
+               ymesh[self.mask & np.isfinite(self.Vlsr)]
+        w = (1./self.eVlsr**2.)[self.mask & np.isfinite(self.Vlsr)]
 
-    # Fit the data using astropy.modeling
-    model = modeling.polynomial.Polynomial2D(degree = 1)
-    fitter = modeling.fitting.LevMarLSQFitter()
-    fitted = fitter(p_init, x, y, z,
-                    weights = w)
-    ## fitted parameters
-    x1 = fitted.parameters[1]  ## x
-    x2 = fitted.parameters[2]  ## y
-    e1 = np.sqrt((fitter.fit_info['param_cov'])[1, 1])
-    e2 = np.sqrt((fitter.fit_info['param_cov'])[2, 2])
+        # Fit the data using astropy.modeling
+        model = modeling.polynomial.Polynomial2D(degree = 1)
+        fitter = modeling.fitting.LevMarLSQFitter()
+        fitted = fitter(p_init, x, y, z,
+                        weights = w)
+        ## fitted parameters
+        x1 = fitted.parameters[1]  ## x
+        x2 = fitted.parameters[2]  ## y
+        e1 = np.sqrt((fitter.fit_info['param_cov'])[1, 1])
+        e2 = np.sqrt((fitter.fit_info['param_cov'])[2, 2])
+        ## Store the fits
+        self._fit = {'fitted': fitted,
+                     'fitter': fitter,
+                     'x': x1,
+                     'y': x2,
+                     'ex': e1,
+                     'ey': e2}
 
 
-    # result
-    ## Grad in km/s/pix
-    Grad = np.sqrt(x1**2.+x2**2.)
-    eGrad = (.5*1./np.sqrt(x1**2.+x2**2.))**2.\
-            *((2.*x1*e1)**2.+(2.*x2*e2)**2.)
-    eGrad = np.sqrt(eGrad)
-    ## PAGrad in degrees
-    PAGrad = np.degrees(np.arctan2(x1, x2))
-    if (PAGrad >= -180.) and (PAGrad <= -90.): ## convert to E of N
-        PAGrad = PAGrad + 270.
-    else:
-        PAGrad = PAGrad - 90.
-    ePAGrad = (1./(1.+(x1/x2)**2.)*(e1/x2))**2.\
-              +(1./(1.+(x1/x2)**2.)*(x1*e2/x2**2.))**2.
-    ePAGrad = np.sqrt(ePAGrad)
-
-
-
-    term1 = (1./(1.+(x1/x2)**2.))*(1./x2)*(180./np.pi)
-    term2 = (1./(1.+(x1/x2)**2.))*(-x1/x2**2.)*(180./np.pi)
-
-    V_grad_PA_Err = np.sqrt(term1**2.*sig1**2.+term2**2.*sig2**2.)
-
-
-    return V_grad_mag, V_grad_PA, V_grad_mag_Err, V_grad_PA_Err, p
+        # result
+        ## Grad in km/s/pix
+        Grad = np.sqrt(x1**2.+x2**2.)
+        eGrad = (.5*1./np.sqrt(x1**2.+x2**2.))**2.\
+                *((2.*x1*e1)**2.+(2.*x2*e2)**2.)
+        eGrad = np.sqrt(eGrad)
+        self.Grad, self.eGrad = Grad, eGrad
+        ## PAGrad in degrees
+        PAGrad = np.degrees(np.arctan2(x1, x2))
+        if (PAGrad >= -180.) and (PAGrad <= -90.): ## convert to E of N
+            PAGrad = PAGrad + 270.
+        else:
+            PAGrad = PAGrad - 90.
+        ePAGrad = (1./(1.+(x1/x2)**2.)*(e1/x2))**2.\
+                  +(1./(1.+(x1/x2)**2.)*(x1*e2/x2**2.))**2.
+        ePAGrad = np.sqrt(ePAGrad)
+        self.PAGrad, self.ePAGrad = PAGrad, ePAGrad
