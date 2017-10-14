@@ -12,6 +12,7 @@ from astropy.coordinates import SkyCoord, FK4, FK5
 import pandas as pd
 
 #
+from constants import *
 import styles
 
 
@@ -66,7 +67,7 @@ table1_updated['major'] = table1['major']*(table1_updated['Distance']/table1['Di
 ## minor FWHM
 table1_updated['minor'] = table1['minor']*(table1_updated['Distance']/table1['Distance'])
 ## R (FWHM)
-table1_updated['R'] = np.sqrt(table1_updated['major']*table1_updated['minor'])
+table1_updated['Reff'] = np.sqrt(table1_updated['major']*table1_updated['minor'])
 
 
 # Tkin and SigmaNH3 from Benson & Myers 1989 and Ladd et al. 1994
@@ -84,12 +85,20 @@ table1_updated['SigmaNH3'] = pd.Series([.39, .31, .34, .28, .21, .23, .29, np.na
                                         .37, np.nan, .37])/(2.*np.sqrt(2.*np.log(2.)))
 table1_updated['SigmaNH3'] = np.around(table1_updated['SigmaNH3'],
                                        decimals = 2)
+## Derived properties (use only SigmaTot from Goodman93 and Tkin from BM and Ladd94)
+### SigmaT
+table1_updated['SigmaT'] = np.sqrt(c.k_B*table1_updated['Tkin'].values*u.K/(mass['average'])).to(u.km/u.s).value
+### SigmaNT
+table1_updated['SigmaNT'] = np.sqrt((table1_updated['SigmaTot'].values*u.km/u.s)**2.\
+                                    -(table1_updated['SigmaT'].values*u.km/u.s)**2.).to(u.km/u.s).value
+
 
 
 # Reorder the columns.
 col_list = ['ID', 'Distance', 'eDistance', 'RA', 'Dec',
             'Vlsr', 'SigmaTot', 'M', 'major', 'minor',
-            'R', 'PA', 'AspectRatio', 'Tkin', 'SigmaNH3']
+            'Reff', 'PA', 'AspectRatio', 'Tkin', 'SigmaNH3',
+            'SigmaT', 'SigmaNT']
 table1_updated = table1_updated[col_list]
 
 
