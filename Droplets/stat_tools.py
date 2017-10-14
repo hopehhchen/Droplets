@@ -94,7 +94,7 @@ class statBasic2D(object):
 
 class statGrad(object):
 
-    def __init__(dict_data, dict_masks, region, structureID):
+    def __init__(self, dict_data, dict_masks, region, structureID):
 
         self.Vlsr = dict_data[region]['Vlsr']
         self.eVlsr = dict_data[region]['eVlsr']
@@ -104,14 +104,14 @@ class statGrad(object):
                                    np.arange(self.Vlsr.shape[0]))
 
         z = self.Vlsr[self.mask & np.isfinite(self.Vlsr)]
-        x, y = xmesh[self.mask & np.isfinite(self.Vlsr)],
+        x, y = xmesh[self.mask & np.isfinite(self.Vlsr)],\
                ymesh[self.mask & np.isfinite(self.Vlsr)]
         w = (1./self.eVlsr**2.)[self.mask & np.isfinite(self.Vlsr)]
 
         # Fit the data using astropy.modeling
         model = modeling.polynomial.Polynomial2D(degree = 1)
         fitter = modeling.fitting.LevMarLSQFitter()
-        fitted = fitter(p_init, x, y, z,
+        fitted = fitter(model, x, y, z,
                         weights = w)
         ## fitted parameters
         x1 = fitted.parameters[1]  ## x
@@ -119,7 +119,8 @@ class statGrad(object):
         e1 = np.sqrt((fitter.fit_info['param_cov'])[1, 1])
         e2 = np.sqrt((fitter.fit_info['param_cov'])[2, 2])
         ## Store the fits
-        self._fit = {'fitted': fitted,
+        self._fit = {'model': model,
+                     'fitted': fitted,
                      'fitter': fitter,
                      'x': x1,
                      'y': x2,
@@ -135,7 +136,7 @@ class statGrad(object):
         eGrad = np.sqrt(eGrad)
         self.Grad, self.eGrad = Grad, eGrad
         ## PAGrad in degrees
-        PAGrad = np.degrees(np.arctan2(x1, x2))
+        PAGrad = np.degrees(np.arctan2(x2, x1))
         if (PAGrad >= -180.) and (PAGrad <= -90.): ## convert to E of N
             PAGrad = PAGrad + 270.
         else:

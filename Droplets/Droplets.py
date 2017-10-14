@@ -147,24 +147,21 @@ def fitGradient(mask, Vlsr, eVlsr):
 
 def convertAngle(angle):
     '''
-    The function that converts the numpy angles to PA [E of N] and remove
-    redundancies.
+    The function that converts the numpy angles to PA [E of N], to a (-180, 180)
+    range.
 
     Input
     ------
     angle: in degrees.
     '''
 
-    # Rotate by 90 degrees counter-clockwise.
-    angle = angle - 90.
+    # For angles in the 4th quadrant, unwrap after move the origin to N.
+    if (angle >= -180.) and (angle <= -90.): ## convert to E of N
+        angle = angle + 270.
 
-    # Remove degeneracy around the 180 degree mark.
-    if angle <= 0.:
-        angle = angle + 180.
-
-    # Convert angles in the SE quadrant to positive values.
-    if angle <= 0.:
-        angle = angle + 180.
+    # For others, just move the origin to N.
+    else:
+        angle = angle - 90.
 
 
 
