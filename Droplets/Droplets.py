@@ -807,8 +807,8 @@ def plotTpeakSigma(list_dictionaries, xscale = 'log'):
     ymin, ymax = .02, .92
 
     #
-    Sigma_SonicNT = (np.sqrt(c.k_B*10.*u.K/(17.031*u.u)+c.k_B*10.*u.K/(2.37*u.u))).to(u.km/u.s).value
-    Sigma_halfSonicNT = (np.sqrt((c.k_B*10.*u.K/(17.031*u.u)+.5**2.*c.k_B*10.*u.K/(2.37*u.u)))).to(u.km/u.s).value
+    Sigma_SonicNT = (np.sqrt(c.k_B*10.*u.K/mass['NH3']+c.k_B*10.*u.K/mass['average'])).to(u.km/u.s).value
+    Sigma_halfSonicNT = (np.sqrt((c.k_B*10.*u.K/mass['NH3']+.5**2.*c.k_B*10.*u.K/mass['average']))).to(u.km/u.s).value
 
     for i, reg in enumerate(['L1688', 'B18']):
 
@@ -986,11 +986,11 @@ def plotSigmas(list_dictionaries, plotSigma = 'sigma', plotRfromA = False):
     ymin, ymax = .02, .65
 
     #
-    SigmaNT_Sonic = (np.sqrt(c.k_B*10.*u.K/(2.37*u.u))).to(u.km/u.s).value
-    SigmaNT_halfSonic = (np.sqrt(.5**2.*c.k_B*10.*u.K/(2.37*u.u))).to(u.km/u.s).value
+    SigmaNT_Sonic = (np.sqrt(c.k_B*10.*u.K/mass['average'])).to(u.km/u.s).value
+    SigmaNT_halfSonic = (np.sqrt(.5**2.*c.k_B*10.*u.K/mass['average'])).to(u.km/u.s).value
     #
-    Sigma_SonicNT = (np.sqrt(c.k_B*10.*u.K/(17.031*u.u)+c.k_B*10.*u.K/(2.37*u.u))).to(u.km/u.s).value
-    Sigma_halfSonicNT = (np.sqrt((c.k_B*10.*u.K/(17.031*u.u)+.5**2.*c.k_B*10.*u.K/(2.37*u.u)))).to(u.km/u.s).value
+    Sigma_SonicNT = (np.sqrt(c.k_B*10.*u.K/mass['NH3']+c.k_B*10.*u.K/mass['average'])).to(u.km/u.s).value
+    Sigma_halfSonicNT = (np.sqrt((c.k_B*10.*u.K/mass['NH3']+.5**2.*c.k_B*10.*u.K/mass['average']))).to(u.km/u.s).value
 
     #
     figLeft, figRight, figBottom, figTop = .06, .99, .055, .9

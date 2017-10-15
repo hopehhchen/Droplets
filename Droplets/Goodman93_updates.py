@@ -78,13 +78,13 @@ table1_updated['Tkin'] = pd.Series([11., 11., 10.8, 9.5, 10., np.nan, 10., np.na
                                     np.nan, 11.2, 10.4, 9.2, 10., 10., 10., 14.2, 10., 12.5,
                                     10.5, np.nan, 10.3])
 ## SigmaNH3
-table1_updated['SigmaNH3'] = pd.Series([.39, .31, .34, .28, .21, .23, .29, np.nan, np.nan, np.nan,
-                                        .30, .34, .46, .26, .32, .34, .28, .24, .23, .44,
-                                        .82, .32, .26, np.nan, .32, .21, .29, .30, .23, .26,
-                                        np.nan, .40, .33, .36, .40, .27, .74, .43, .70, .94,
-                                        .37, np.nan, .37])/(2.*np.sqrt(2.*np.log(2.)))
-table1_updated['SigmaNH3'] = np.around(table1_updated['SigmaNH3'],
-                                       decimals = 2)
+table1_updated['Sigma'] = pd.Series([.39, .31, .34, .28, .21, .23, .29, np.nan, np.nan, np.nan,
+                                     .30, .34, .46, .26, .32, .34, .28, .24, .23, .44,
+                                     .82, .32, .26, np.nan, .32, .21, .29, .30, .23, .26,
+                                     np.nan, .40, .33, .36, .40, .27, .74, .43, .70, .94,
+                                     .37, np.nan, .37])/(2.*np.sqrt(2.*np.log(2.)))
+table1_updated['Sigma'] = np.around(table1_updated['Sigma'],
+                                    decimals = 2)
 ## Derived properties (use only SigmaTot from Goodman93 and Tkin from BM and Ladd94)
 ### SigmaT
 table1_updated['SigmaT'] = np.sqrt(c.k_B*table1_updated['Tkin'].values*u.K/(mass['average'])).to(u.km/u.s).value
@@ -97,7 +97,7 @@ table1_updated['SigmaNT'] = np.sqrt((table1_updated['SigmaTot'].values*u.km/u.s)
 # Reorder the columns.
 col_list = ['ID', 'Distance', 'eDistance', 'RA', 'Dec',
             'Vlsr', 'SigmaTot', 'M', 'major', 'minor',
-            'Reff', 'PA', 'AspectRatio', 'Tkin', 'SigmaNH3',
+            'Reff', 'PA', 'AspectRatio', 'Tkin', 'Sigma',
             'SigmaT', 'SigmaNT']
 table1_updated = table1_updated[col_list]
 
