@@ -16,11 +16,14 @@ rcParams['image.cmap'] = 'viridis'
 rcParams['image.interpolation'] = 'none'
 rcParams['image.origin'] = 'bottom'
 # ticks
-rcParams['xtick.major.size'] = 8.
-rcParams['xtick.minor.size'] = 4.
+rcParams['xtick.top'] = True
+rcParams['xtick.major.size'] = 10.
+rcParams['xtick.minor.size'] = 5.
 rcParams['xtick.direction'] = 'in'
-rcParams['ytick.major.size'] = 8.
-rcParams['ytick.minor.size'] = 4.
+rcParams['ytick.right'] = True
+rcParams['xtick.major.pad'] = 3.6
+rcParams['ytick.major.size'] = 10.
+rcParams['ytick.minor.size'] = 5.
 rcParams['ytick.direction'] = 'in'
 # patch
 rcParams['patch.facecolor'] = 'yellow'

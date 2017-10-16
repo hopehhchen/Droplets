@@ -69,6 +69,9 @@ table1_updated['minor'] = table1['minor']*(table1_updated['Distance']/table1['Di
 ## R (FWHM)
 table1_updated['Reff'] = np.sqrt(table1_updated['major']*table1_updated['minor'])
 
+# aspect ratio redefined by major/minor (instead of minor/major)
+table1_updated['AspectRatio'] = 1./table1['AspectRatio']
+
 
 # Tkin and SigmaNH3 from Benson & Myers 1989 and Ladd et al. 1994
 ## Tkin
